@@ -1,29 +1,44 @@
 package ml.uname.app.nearbyquestionactivity;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 
 public class NearbyQuestionActivity extends Activity {
 
-    private AnimateView mAnimateView;
+
+    RadarDrawable drawable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nearby_question);
-        mAnimateView = (AnimateView) findViewById(R.id.animate_view);
+        drawable = new RadarDrawable(3000, Color.parseColor("#dadada"), Color.parseColor("#ffffff"), 100);
+        drawable.setStopCallback(new Callback());
+        ((ImageView) findViewById(R.id.frame)).setImageDrawable(drawable);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            drawable.start();
+        }
     }
 
     public void start(View v) {
-        mAnimateView.start();
+        drawable.start();
     }
 
     public void stop(View v) {
-        mAnimateView.stop();
+        drawable.stop();
+//        mAnimateView.stop();
     }
 
     @Override
@@ -43,5 +58,13 @@ public class NearbyQuestionActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private class Callback implements RadarDrawable.StopCallback {
+
+        @Override
+        public void onStop() {
+            Toast.makeText(NearbyQuestionActivity.this, "hello", Toast.LENGTH_SHORT).show();
+        }
     }
 }

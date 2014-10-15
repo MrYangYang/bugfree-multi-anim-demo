@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AnimateView">
+        <attr name="CircleWidth" format="dimension" />
+        <attr name="StartColor" format="color" />
+        <attr name="EndColor" format="color" />
+    </declare-styleable>
+</resources>
