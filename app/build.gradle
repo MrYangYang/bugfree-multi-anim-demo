@@ -25,4 +25,10 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:support-annotations:20.0.0'
+    compile 'com.google.android:support-v4:r7'
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'com.nhaarman.listviewanimations:lib-core:3.1.0@jar'
+    compile 'com.nhaarman.listviewanimations:lib-manipulation:3.1.0@jar'
+    compile 'com.nhaarman.listviewanimations:lib-core-slh:3.1.0@jar'
 }
