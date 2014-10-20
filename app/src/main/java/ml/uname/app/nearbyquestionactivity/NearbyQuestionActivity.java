@@ -1,25 +1,32 @@
 package ml.uname.app.nearbyquestionactivity;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
+import android.view.ViewTreeObserver;
+import android.view.animation.ScaleAnimation;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.view.ViewHelper;
 import com.nineoldandroids.view.ViewPropertyAnimator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class NearbyQuestionActivity extends Activity {
@@ -112,7 +119,7 @@ public class NearbyQuestionActivity extends Activity {
                                     int x0 = avatarImageView.getWidth() / 2;
                                     LineDrawable drawable1 = new LineDrawable(5, 500, new Point(x0, 0), new Point(x0, listview.getHeight()), Color.parseColor("#cccccc"));
                                     drawable1.setCallback(new DrawLineCallback());
-                                    listview.setBackgroundDrawable(drawable1);
+                                    container.setBackgroundDrawable(drawable1);
                                     drawable1.start();
                                 }
 
@@ -137,13 +144,122 @@ public class NearbyQuestionActivity extends Activity {
 
         @Override
         public void onStop() {
-            AlphaInAnimationAdapter adapter = new AlphaInAnimationAdapter(new ListAdapter());
-            adapter.setAbsListView(listview);
+            final ListAdapter adapter = new ListAdapter();
+            listview.setEnabled(false);
             listview.setAdapter(adapter);
+            listview.setVisibility(View.VISIBLE);
+
+            listview.getViewTreeObserver().addOnGlobalLayoutListener(globalLayoutListener);
+        }
+    }
+
+
+    private ViewTreeObserver.OnGlobalLayoutListener globalLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+
+        @Override
+        public void onGlobalLayout() {
+            int f = listview.getFirstVisiblePosition();
+            int l = listview.getLastVisiblePosition();
+            View v;
+            List<View> views = new ArrayList<View>();
+            for (int i = f; i <= l; i++) {
+                v = listview.getChildAt(i).findViewById(R.id.avatar);
+                View tmp = listview.getChildAt(i).findViewById(R.id.text);
+                if (tmp != null) {
+                    ViewHelper.setX(tmp, tmp.getX() + tmp.getWidth());
+                    views.add(tmp);
+                }
+                ViewHelper.setScaleX(v, 0);
+                ViewHelper.setScaleY(v, 0);
+                ViewPropertyAnimator animator;
+                animator = ViewPropertyAnimator.animate(v);
+                animator.scaleX(1)
+                        .scaleY(1)
+                        .setDuration(500);
+                if (i == l) {
+                    animator.setListener(new ScaleAnimationListener(views));
+                }
+                animator.start();
+            }
+        }
+    };
+
+
+    class ScaleAnimationListener implements Animator.AnimatorListener {
+
+        private List<View> views;
+
+        ScaleAnimationListener(List<View> views) {
+            this.views = views;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(final Animator animation) {
+            int delay = 0;
+            int step = 200;
+
+            Handler handler = new Handler();
+            for (int i = 0; i < views.size(); i++) {
+                final View view = views.get(i);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        ViewPropertyAnimator animator = ViewPropertyAnimator.animate(view)
+                                .x(view.getX() - view.getWidth())
+                                .setDuration(200);
+                        if (view.equals(views.get(views.size() - 1))) {
+                            animator.setListener(new Animator.AnimatorListener() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    listview.setEnabled(true);
+                                    if (Build.VERSION.SDK_INT >= 14) {
+                                        listview.getViewTreeObserver().removeOnGlobalLayoutListener(globalLayoutListener);
+                                    }
+                                }
+
+                                @Override
+                                public void onAnimationCancel(Animator animation) {
+
+                                }
+
+                                @Override
+                                public void onAnimationRepeat(Animator animation) {
+
+                                }
+                            });
+                            animator.start();
+                        }
+                    }
+                }, delay);
+                delay += step;
+            }
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
         }
     }
 
     private class ListAdapter extends BaseAdapter {
+
+
+        boolean mInitAnimEnd = false;
 
         @Override
         public int getCount() {
@@ -162,6 +278,8 @@ public class NearbyQuestionActivity extends Activity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+
+
             if (getItemViewType(position) == 0) {
                 if (convertView == null) {
                     convertView = LayoutInflater.from(NearbyQuestionActivity.this).inflate(R.layout.list_item_head, parent, false);
@@ -174,7 +292,13 @@ public class NearbyQuestionActivity extends Activity {
                 convertView = LayoutInflater.from(NearbyQuestionActivity.this).inflate(R.layout.list_item, parent, false);
             }
 
+
             ((TextView) convertView.findViewById(R.id.text)).setText(position + "");
+//            if (!mInitAnimEnd) {
+//                convertView.setVisibility(View.INVISIBLE);
+//            } else {
+//                convertView.setVisibility(View.VISIBLE);
+//            }
             return convertView;
         }
 
@@ -190,5 +314,8 @@ public class NearbyQuestionActivity extends Activity {
             else
                 return 1;
         }
+
     }
+
+
 }
