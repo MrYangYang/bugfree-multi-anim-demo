@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/NearbyQuestionActivity.iml" filepath="$PROJECT_DIR$/NearbyQuestionActivity.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/nearbydemo.iml" filepath="$PROJECT_DIR$/nearbydemo.iml" />
     </modules>
   </component>
 </project>
